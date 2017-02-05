@@ -53,5 +53,5 @@ gulp.task('watch', function () {
     gulp.watch(paths.html, ['html']);
 });
 
-gulp.task('default', ['less', 'js']);
+gulp.task('build', ['less', 'js']);
 gulp.task('serve', ['connect']);
