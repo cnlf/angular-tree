@@ -1,0 +1,49 @@
+/**
+ * @file 基于Angular 1.x的数控件
+ * @author wlf-21@163.com
+ */
+.angular-tree {
+  line-height: 2em;
+  cursor: pointer;
+}
+.angular-tree .angular-tree-row {
+  padding: 0;
+  margin: 0;
+}
+.angular-tree .active {
+  color: #fff;
+  background-color: #19a9d5;
+}
+.angular-tree .indented {
+  position: relative;
+}
+.angular-tree .level-1 .indented {
+  left: 5px;
+}
+.angular-tree .level-2 .indented {
+  left: 25px;
+}
+.angular-tree .level-3 .indented {
+  left: 45px;
+}
+.angular-tree .level-4 .indented {
+  left: 65px;
+}
+.angular-tree .level-5 .indented {
+  left: 85px;
+}
+.angular-tree .level-6 .indented {
+  left: 105px;
+}
+.angular-tree .level-7 .indented {
+  left: 125px;
+}
+.angular-tree .level-8 .indented {
+  left: 145px;
+}
+.angular-tree .level-9 .indented {
+  left: 165px;
+}
+.angular-tree .level-10 .indented {
+  left: 185px;
+}

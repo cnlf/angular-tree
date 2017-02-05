@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en" ng-app="TreeTest">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ng-tree demo</title>
+    <script type="text/javascript" src="./angular.js"></script>
+    <style>
+        body, html {
+            font-family: 'Microsoft Yahei', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', SimSun, sans-serif;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #58666e;
+        }
+
+        .hbox {
+            width: 100%;
+            height: 100%;
+            display: table;
+            table-layout: fixed;
+        }
+
+        .hbox .col {
+            display: table-cell;
+            vertical-align: top;
+            background-color: #f0f3f4;
+            padding: 15px 20px;
+        }
+
+        .hbox .col:nth-of-type(1) {
+            width: 25%;
+            padding-left: 15px;
+            padding-right: 15px;
+            background-color: #e4eaec;
+        }
+
+        .demo button {
+            line-height: 2em;
+            border: 1px #c7d3d6 solid;
+            border-bottom-color: #d8e1e3;
+            background-color: #fff;
+            margin: 2px;
+            outline: 0;
+            box-shadow: 0 1px 1px rgba(90, 90, 90, 0.1);
+        }
+
+        .demo button:hover {
+            background-color: #edf1f2;
+            border-color: #c7d3d6;
+        }
+
+        .demo h1 {
+            margin: 0;
+            line-height: 2em;
+            font-size: 30px;
+        }
+
+        .demo ul,
+        .demo li {
+            margin: 0;
+            padding: 0;
+        }
+
+        .demo li {
+            list-style: none;
+        }
+
+        .demo pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+    <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../src/css/tree.css">
+</head>
+<body ng-controller="TreeTestController">
+<div class="icon icon-small icon-plus"></div>
+<h1>angular-tree</h1>
+<div class="hbox demo">
+    <div class="col">
+        <button ng-click="tryChangingTreeData()" class="btn btn-default btn-sm">切换数据</button>
+        <br>
+        <button ng-click="tryAsyncLoad()" class="btn btn-default btn-sm">异步加载数据</button>
+        <br>
+        <button ng-click="getFirstBranch()" class="btn btn-default btn-sm">获取第一个节点</button>
+        <button ng-click="getSelectedBranch()" class="btn btn-default btn-sm">获取已选择的节点</button>
+        <button ng-click="getParentBranch()" class="btn btn-default btn-sm">获取父级节点</button>
+        <button ng-click="getSiblings()" class="btn btn-default btn-sm">获取兄弟节点</button>
+        <button ng-click="getNextSibling()" class="btn btn-default btn-sm">获取下一个兄弟节点</button>
+        <button ng-click="getPrevSibling()" class="btn btn-default btn-sm">获取上一个兄弟节点</button>
+        <br>
+        <button ng-click="myTree.selectFirstBranch()" class="btn btn-default btn-sm">选择第一个节点</button>
+        <button ng-click="myTree.selectNextSibling()" class="btn btn-default btn-sm">选择下一个兄弟节点</button>
+        <button ng-click="myTree.selectPrevSibling()" class="btn btn-default btn-sm">选择上一个兄弟节点</button>
+        <br>
+        <button ng-click="myTree.selectNextBranch()" class="btn btn-default btn-sm">下一个节点</button>
+        <button ng-click="myTree.selectPrevBranch()" class="btn btn-default btn-sm">上一个节点</button>
+        <br>
+        <button ng-click="myTree.selectParentBranch()" class="btn btn-default btn-sm">选择父级节点</button>
+        <hr>
+        <button ng-click="myTree.expandBranch()" class="btn btn-default btn-sm">展开</button>
+        <button ng-click="myTree.collapseBranch()" class="btn btn-default btn-sm">折叠</button>
+        <button ng-click="myTree.expandAll()" class="btn btn-default btn-sm">展开所有</button>
+        <button ng-click="myTree.collapseAll()" class="btn btn-default btn-sm">折叠所有</button>
+        <hr>
+        <button ng-click="addBranch()" class="btn btn-default btn-sm">添加节点</button>
+        <button ng-click="addRootBranch()" class="btn btn-default btn-sm">添加根节点</button>
+    </div>
+    <div class="col">
+        <span ng-if="doingAsync">loading...</span>
+        <ui-tree tree-data="myData" tree-control="myTree" on-select="myTreeHandler(branch)"
+                 expand-level="1" initial-selection=""></ui-tree>
+    </div>
+    <div class="col">
+        <pre>{{output}}</pre>
+    </div>
+</div>
+<script type="text/javascript" src="../src/js/tree-directive.js"></script>
+<script>
+    (function () {
+        var app = angular.module('TreeTest', ['angularTree']);
+
+        app.controller('TreeTestController', function ($scope, $timeout) {
+            let tree;
+            let treedata1 = [
+                {
+                    id: 1,
+                    label: '云课堂',
+                    children: [
+                        {
+                            id: 2,
+                            label: '兴趣生活',
+                            children: [
+                                {
+                                    id: 3,
+                                    label: '投资理财',
+                                    children: [
+                                        {
+                                            id: 4,
+                                            label: '股票投资'
+                                        },
+                                        {
+                                            id: 5,
+                                            label: '期货投资'
+                                        },
+                                        {
+                                            id: 6,
+                                            label: '贵金属投资'
+                                        },
+                                        {
+                                            id: 7,
+                                            label: '其他投资'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 8,
+                            label: '生活百科'
+                        }
+                    ]
+                },
+                {
+                    id: 9,
+                    label: '文艺体育',
+                    children: [
+                        {
+                            id: 10,
+                            label: '唱歌'
+                        },
+                        {
+                            id: 11,
+                            label: '舞蹈'
+                        },
+                        {
+                            id: 12,
+                            label: '书画'
+                        },
+                        {
+                            id: 13,
+                            label: '乐器'
+                        },
+                        {
+                            id: 14,
+                            label: '棋牌'
+                        }
+                    ]
+                }
+            ];
+            let treedata2 = [
+                {
+                    id: 1,
+                    label: 'IT互联网',
+                    children: [
+                        {
+                            id: 2,
+                            label: '互联网产品',
+                            children: [
+                                {
+                                    id: 3,
+                                    label: '互联网营销',
+                                    children: [
+                                        {
+                                            id: 4,
+                                            label: '网络营销理论'
+                                        },
+                                        {
+                                            id: 5,
+                                            label: '淘宝营销'
+                                        },
+                                        {
+                                            id: 6,
+                                            label: '微信营销'
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 7,
+                                    label: '产品运营'
+                                },
+                                {
+                                    id: 8,
+                                    label: '游戏策划'
+                                },
+                                {
+                                    id: 9,
+                                    label: '游戏运营'
+                                },
+                                {
+                                    id: 10,
+                                    label: '互联网软件'
+                                }
+                            ]
+                        },
+                        {
+                            id: 11,
+                            label: '网络运维'
+                        }
+                    ]
+                },
+                {
+                    id: 12,
+                    label: '设计创作',
+                    children: [
+                        {
+                            id: 13,
+                            label: '设计软件'
+                        },
+                        {
+                            id: 14,
+                            label: '游戏美术设计'
+                        }
+                    ]
+                }
+            ];
+
+            $scope.myTree = tree = {};
+            $scope.myTreeHandler = function (branch) {
+                $scope.output = '已选择：' + branch.label;
+            };
+            $scope.myData = [
+                {
+                    id: 1,
+                    label: '云计算',
+                    children: [
+                        {
+                            id: 2,
+                            label: '产品与服务',
+                            children: [
+                                {
+                                    id: 3,
+                                    label: '云计算服务',
+                                    children: [
+                                        {
+                                            id: 4,
+                                            label: '弹性计算'
+                                        },
+                                        {
+                                            id: 6,
+                                            label: '数据库'
+                                        },
+                                        {
+                                            id: 7,
+                                            label: '存储与CDN'
+                                        }
+                                    ]
+                                },
+                                {
+                                    id: 8,
+                                    label: '解决方案',
+                                    children: [
+                                        {
+                                            id: 9,
+                                            label: '行业解决方案'
+                                        },
+                                        {
+                                            id: 10,
+                                            label: '通用解决方案'
+                                        },
+                                        {
+                                            id: 11,
+                                            label: '大数据解决方案'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            id: 12,
+                            label: '云市场'
+                        }
+                    ]
+                },
+                {
+                    id: 13,
+                    label: '帮助中心',
+                    children: [
+                        {
+                            id: 14,
+                            label: '帮助文档'
+                        },
+                        {
+                            id: 15,
+                            label: '产品讨论'
+                        }
+                    ]
+                }
+            ];
+            $scope.tryChangingTreeData = function () {
+                if ($scope.myData === treedata2) {
+                    return $scope.myData = treedata1;
+                } else {
+                    return $scope.myData = treedata2;
+                }
+            };
+            $scope.getFirstBranch = function () {
+                $scope.output = JSON.stringify(tree.getFirstBranch());
+            };
+            $scope.getSelectedBranch = function () {
+                $scope.output = JSON.stringify(tree.getSelectedBranch());
+            };
+            $scope.getParentBranch = function () {
+                $scope.output = JSON.stringify(tree.getParentBranch());
+            };
+            $scope.getSiblings = function () {
+                $scope.output = JSON.stringify(tree.getSiblings());
+            };
+            $scope.getNextSibling = function () {
+                $scope.output = JSON.stringify(tree.getNextSibling());
+            };
+            $scope.getPrevSibling = function () {
+                $scope.output = JSON.stringify(tree.getPrevSibling());
+            };
+            $scope.tryAsyncLoad = function () {
+                $scope.myData = [];
+                $scope.doingAsync = true;
+                $timeout(function () {
+                    if (Math.random() < 0.5) {
+                        $scope.myData = treedata1;
+                    } else {
+                        $scope.myData = treedata2;
+                    }
+                    $scope.doingAsync = false;
+                    tree.expandAll();
+                }, 1000);
+            };
+            $scope.addBranch = function () {
+                var b;
+                b = tree.getSelectedBranch();
+                tree.addBranch(b, {
+                    id: new Date().getTime(),
+                    label: 'New Branch',
+                });
+            };
+            $scope.addRootBranch = function () {
+                tree.addRootBranch({
+                    id: new Date().getTime(),
+                    label: 'New root Branch',
+                });
+            };
+        });
+
+    }).call(window);
+</script>
+</body>
+</html>
