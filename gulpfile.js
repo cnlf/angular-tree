@@ -14,6 +14,7 @@ gulp.task('less', () => {
         .pipe($.plumber())
         .pipe($.sourcemaps.init())
         .pipe($.less())
+        .pipe($.minifyCss())
         .pipe($.rename({suffix: '.min'}))
         .pipe($.sourcemaps.write('.'))
         .pipe($.connect.reload())

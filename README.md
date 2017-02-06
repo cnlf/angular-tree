@@ -3,5 +3,6 @@ angular-tree
 
 
     npm i
-    gulp serve
+    npm build
+    npm start
     http://localhost:9998/example/
